@@ -69,10 +69,11 @@ document.addEventListener("DOMContentLoaded", function() {
     function initializeBoard() {
         for (let i = 0; i < rows; i++) {
             let rowContainer = document.createElement("div");
-            rowContainer.classList.add("flex", "justify-start", i % 2 === 0 ? "ml-0" : "ml-8"); // Décalage pour l'effet nid d'abeille
+            rowContainer.classList.add("row");
+            rowContainer.style.marginLeft = i % 2 === 0 ? '30px' : '0px';
             for (let j = 0; j < cols; j++) {
                 const hexagon = document.createElement("div");
-                hexagon.className = "hexagon"; // Utilisez la classe définie ci-dessus
+                hexagon.className = "hexagon";
                 hexagon.dataset.row = i;
                 hexagon.dataset.col = j;
                 hexagon.addEventListener("click", hexagonClick);
@@ -81,31 +82,24 @@ document.addEventListener("DOMContentLoaded", function() {
             board.appendChild(rowContainer);
         }
     }
-    
-    
-    
+
     function hexagonClick() {
         const row = parseInt(this.dataset.row);
         const col = parseInt(this.dataset.col);
         if (gameBoard[row][col] === 0) {
             gameBoard[row][col] = currentPlayer;
-    
-            // Mettez à jour la classe pour refléter le joueur actuel
-            this.classList.remove('bg-gray-300', 'hover:bg-gray-400'); // Retirer les classes initiales de couleur de fond et de hover
-            this.classList.add(currentPlayer === 1 ? 'player1' : 'player2'); // Utiliser les classes player1 et player2 pour la couleur
-    
+            this.className = `hexagon player${currentPlayer}`;
             if (checkWin(currentPlayer)) {
                 winnerMessage.textContent = `Joueur ${currentPlayer} gagne !`;
-                alert(`Félicitations ! Joueur ${currentPlayer} gagne !`);
-                resetGame();
+                alert(`Félicitations ! Joueur ${currentPlayer} gagne !`); // Affiche une alerte lorsqu'un joueur gagne
+                resetGame(); // Réinitialisation automatique du jeu après la victoire
             } else {
                 currentPlayer = currentPlayer === 1 ? 2 : 1;
                 updateCurrentPlayerDisplay();
             }
         }
     }
-    
-    
+
     updateCurrentPlayerDisplay();
     initializeBoard();
 
