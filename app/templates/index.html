@@ -19,7 +19,7 @@
         <div class="container mx-auto text-center">
             <h1 class="text-4xl text-white font-bold">Bienvenue sur Hexagame</h1>
             <p class="text-xl text-white mt-2">Le jeu stratégique inspiré par John Forbes Nash.</p>
-            <a href="/game" class="mt-4 inline-block bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">Jouer</a>
+            <button id="play-button" class="mt-4 inline-block bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">Jouer</button>
         </div>
     </header>
 
@@ -43,5 +43,22 @@
     <footer class="bg-gray-800 text-white text-center p-4">
         <p>© 2024 Hexagame - Tous droits réservés. Inspiré par John Forbes Nash.</p>
     </footer>
+
+    <!-- Modal pour saisir les noms des joueurs -->
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            const playButton = document.getElementById("play-button");
+
+            playButton.addEventListener("click", function() {
+                const player1Name = prompt("Entrez le nom du Joueur 1 :");
+                const player2Name = prompt("Entrez le nom du Joueur 2 :");
+                if (player1Name && player2Name) {
+                    sessionStorage.setItem("player1Name", player1Name);
+                    sessionStorage.setItem("player2Name", player2Name);
+                    window.location.href = "/game";
+                }
+            });
+        });
+    </script>
 </body>
 </html>

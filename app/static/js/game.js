@@ -3,14 +3,29 @@ document.addEventListener("DOMContentLoaded", function() {
     const currentPlayerSpan = document.getElementById("current-player");
     const winnerMessage = document.getElementById("winner-message");
     const resetButton = document.getElementById("reset-button");
+    const difficultySelect = document.getElementById("difficulty-select");
 
-    const rows = 11; // Hauteur du plateau
-    const cols = 11; // Largeur du plateau
+    // Définir la taille initiale du plateau
+    let rows = 7;
+    let cols = 7;
+
+    const player1Name = sessionStorage.getItem("player1Name") || "Joueur 1";
+    const player2Name = sessionStorage.getItem("player2Name") || "Joueur 2";
     let currentPlayer = 1;
     let gameBoard = Array.from({ length: rows }, () => Array(cols).fill(0));
 
+    // Fonction pour mettre à jour la taille du plateau en fonction du choix de difficulté
+    function updateBoardSize() {
+        rows = parseInt(difficultySelect.value);
+        cols = parseInt(difficultySelect.value);
+        resetGame(); // Réinitialiser le jeu avec la nouvelle taille du plateau
+    }
+
+    // Ajouter un écouteur d'événement pour détecter les changements de taille du plateau
+    difficultySelect.addEventListener("change", updateBoardSize);
+
     function updateCurrentPlayerDisplay() {
-        currentPlayerSpan.textContent = `Joueur actuel : Joueur ${currentPlayer}`;
+        currentPlayerSpan.textContent = `Joueur actuel : ${currentPlayer === 1 ? player1Name : player2Name}`;
         // Modifier la couleur de l'en-tête en fonction du joueur actuel
         const header = document.getElementById('game-header'); // Assurez-vous que l'élément a l'ID 'game-header'
         if (currentPlayer === 1) {
@@ -21,16 +36,16 @@ document.addEventListener("DOMContentLoaded", function() {
             header.classList.add('bg-blue-500'); // Ajoute la classe pour le joueur 2
         }
     }
-    
+
     // algorithme BFS (recherche en largeur)
     function checkWin(player) {
         const visited = Array.from({ length: rows }, () => Array(cols).fill(false));
         let win = false;
-    
+
         function dfs(r, c) {
             if (visited[r][c]) return;
             visited[r][c] = true;
-    
+
             // Conditions de victoire spécifiques à chaque joueur
             if (player === 1 && r === rows - 1) {  // Victoire verticale pour le Joueur 1
                 win = true;
@@ -39,7 +54,7 @@ document.addEventListener("DOMContentLoaded", function() {
                 win = true;
                 return;
             }
-    
+
             const directions = [[-1, 0], [1, 0], [0, -1], [0, 1], [-1, 1], [1, -1]];
             for (let [dr, dc] of directions) {
                 const nr = r + dr;
@@ -50,47 +65,7 @@ document.addEventListener("DOMContentLoaded", function() {
                 }
             }
         }
-       
-/* 
-// algorithme DFS (recherche en profondeur)
-function checkWin(player) {
-const visited = Array.from({ length: rows }, () => Array(cols).fill(false));
-let win = false;
-function dfs(r, c) {
-if (visited[r][c]) return;
-visited[r][c] = true;
-// Conditions de victoire spécifiques à chaque joueur
-if (player === 1 && r === rows - 1) { // Victoire verticale pour le Joueur 1
-win = true;
-return;
-} else if (player === 2 && c === cols - 1) { // Victoire horizontale pour le Joueur 2
-win = true;
-return;
-}
-const directions = [[-1, 0], [1, 0], [0, -1], [0, 1], [-1, 1], [1, -1]];
-for (let [dr, dc] of directions) {
-const nr = r + dr;
-const nc = c + dc;
-if (nr >= 0 && nr < rows && nc >= 0 && nc < cols && !visited[nr][nc] && gameBoard[nr][nc] === player) {
-dfs(nr, nc);
-if (win) return; // Sortie immédiate après la victoire
-}
-}
-}
-// Initier la recherche à partir des positions de départ appropriées pour chaque joueur
-for (let i = 0; i < (player === 1 ? cols : rows); i++) {
-if (!win) {
-if (player === 1 && !visited[0][i] && gameBoard[0][i] === player) {
-dfs(0, i);
-} else if (player === 2 && !visited[i][0] && gameBoard[i][0] === player) {
-dfs(i, 0);
-}
-}
-}
-return win;
-} */
 
-    
         // Initier la recherche à partir des positions de départ appropriées pour chaque joueur
         for (let i = 0; i < (player === 1 ? cols : rows); i++) {
             if (!win) {
@@ -103,8 +78,6 @@ return win;
         }
         return win;
     }
-    
-    
 
     function resetGame() {
         gameBoard = Array.from({ length: rows }, () => Array(cols).fill(0));
@@ -114,30 +87,32 @@ return win;
         updateCurrentPlayerDisplay();
         winnerMessage.textContent = '';
         console.log('Game reset');
+
     }
 
-  function initializeBoard() {
-    const board = document.getElementById("hex-game-board");
-    board.innerHTML = ''; // S'assurer que le plateau est vide avant de l'initialiser
+    function initializeBoard() {
+        const board = document.getElementById("hex-game-board");
+        board.innerHTML = ''; // S'assurer que le plateau est vide avant de l'initialiser
+        let leftMargin;
+        for (let i = 0; i < rows; i++) {
+            leftMargin = (i + 1) * 45 + 'px';
+            let rowContainer = document.createElement("div");
+            rowContainer.classList.add("flex", "justify-center"); // Utiliser Tailwind pour le style de la rangée
+            rowContainer.style.marginLeft = leftMargin; // Décalage pour les rangées impaires pour l'effet nid d'abeille
+            rowContainer.style.position = "relative";
 
-    for (let i = 0; i < rows; i++) {
-        let rowContainer = document.createElement("div");
-        rowContainer.classList.add("flex", "justify-center", "mb-1"); // Utiliser Tailwind pour le style de la rangée
-        if (i % 2 === 1) {
-            rowContainer.style.marginLeft = '30px'; // Décalage pour les rangées impaires pour l'effet nid d'abeille
+            for (let j = 0; j < cols; j++) {
+                const hexagon = document.createElement("div");
+                hexagon.classList.add("hexagon", "w-16", "h-14", "bg-gray-300", "cursor-pointer", "flex", "justify-center", "items-center", "transform", "transition", "duration-200", "hover:scale-110");
+                hexagon.dataset.row = i;
+                hexagon.dataset.col = j;
+                hexagon.addEventListener("click", hexagonClick);
+                rowContainer.appendChild(hexagon);
+            }
+            board.appendChild(rowContainer);
         }
-
-        for (let j = 0; j < cols; j++) {
-            const hexagon = document.createElement("div");
-            hexagon.classList.add("hexagon", "w-16", "h-14", "bg-gray-300", "cursor-pointer", "flex", "justify-center", "items-center", "transform", "transition", "duration-200", "hover:scale-110");
-            hexagon.dataset.row = i;
-            hexagon.dataset.col = j;
-            hexagon.addEventListener("click", hexagonClick);
-            rowContainer.appendChild(hexagon);
-        }
-        board.appendChild(rowContainer);
     }
-}
+
 
     
     
@@ -187,12 +162,25 @@ function displayFireworks() {
             }, 1000);
         }
     }, 1000);
+    //  score du joueur gagnant
+    const scoreElement = document.getElementById(`score${currentPlayer}`);
+    let score = parseInt(scoreElement.textContent);
+    score++;
+    scoreElement.textContent = score;
 }
 
 
 
   
+
 function hexagonClick() {
+    // Vérifier si le jeu est en cours de réinitialisation
+    if (winnerMessage.textContent !== '') {
+        // Si le message de victoire est affiché, cela signifie que le jeu est en cours de réinitialisation
+        // Donc, empêcher les joueurs de jouer
+        return;
+    }
+
     const row = parseInt(this.dataset.row);
     const col = parseInt(this.dataset.col);
     if (gameBoard[row][col] === 0) {
@@ -202,13 +190,15 @@ function hexagonClick() {
 
         if (checkWin(currentPlayer)) {
             displayFireworks();  // Afficher les feux d'artifice au lieu de l'alert
-            setTimeout(resetGame, 1500);  // Attendre 9 secondes avant de réinitialiser le jeu
+            setTimeout(resetGame, 9000);  // Attendre 9 secondes avant de réinitialiser le jeu
+
         } else {
             currentPlayer = currentPlayer === 1 ? 2 : 1;
             updateCurrentPlayerDisplay();
         }
     }
 }
+
 
 
    
